@@ -41,7 +41,7 @@ def add_mortgage_loan_transactions():
   for txn in sent_payments:
     logging.info('  %s\t%s\t%s', txn['date'], txn['amount'], txn['payee'])
   assert 1 <= len(sent_payments) and len(sent_payments) <= 3
-  for txn in sent_payments:
+  for txn in reversed(sent_payments):
     add_single_loan_transaction(
         txn,
         mortgage_account_id,
@@ -75,7 +75,7 @@ def add_studentloan_loan_transactions():
   for txn in sent_payments:
     logging.info('  %s\t%s\t%s', txn['date'], txn['amount'], txn['payee'])
   assert 1 <= len(sent_payments) and len(sent_payments) <= 3
-  for txn in sent_payments:
+  for txn in reversed(sent_payments):
     add_single_loan_transaction(
         txn,
         studentloan_account_id,
@@ -104,7 +104,7 @@ def add_single_loan_transaction(sent_payment, loan_account_id, interest_rate,
   transactions = find_transactions(
     '',
     loan_account_id,
-    num_days=30 + 2*max_transfer_delay_days,
+    num_days=60,
     end_date=max_recv_date,
   )
   assert len(transactions) > 0
