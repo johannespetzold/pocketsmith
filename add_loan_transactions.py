@@ -23,6 +23,10 @@ studentloan_account_id = config['studentloan_account']['account_id']
 studentloan_interest_category_id = config['studentloan_account']['interest_category_id']
 studentloan_interest_rate = config.getfloat('studentloan_account', 'interest_rate')
 studentloan_interest_payee = config['studentloan_account']['interest_payee']
+carloan_account_id = config['carloan_account']['account_id']
+carloan_interest_category_id = config['carloan_account']['interest_category_id']
+carloan_interest_rate = config.getfloat('carloan_account', 'interest_rate')
+carloan_interest_payee = config['carloan_account']['interest_payee']
 
 max_transfer_delay_days = 5
 
@@ -32,6 +36,7 @@ base_url = "https://api.pocketsmith.com/v2/"
 def main():
   add_mortgage_loan_transactions()
   add_studentloan_loan_transactions()
+  add_carloan_loan_transactions()
 
 
 def add_mortgage_loan_transactions():
@@ -85,6 +90,23 @@ def add_studentloan_loan_transactions():
         interest_type=studentloan_interest,
     )
 
+def add_carloan_loan_transactions():
+  search_term='car loan payment'
+  logging.info(f'Searching for "{search_term}" transactions...')
+  sent_payments = find_transactions(search_term, checking_account_id, num_days=90)
+  for txn in sent_payments:
+    logging.info('  %s\t%s\t%s', txn['date'], txn['amount'], txn['payee'])
+  assert 1 <= len(sent_payments) and len(sent_payments) <= 3
+  for txn in reversed(sent_payments):
+    add_single_loan_transaction(
+        txn,
+        carloan_account_id,
+        carloan_interest_rate,
+        carloan_interest_category_id,
+        carloan_interest_payee,
+        interest_type=carloan_interest,
+    )
+
 def mortgage_interest(balance, date, interest_rate):
   return balance * interest_rate/100 / 12
 
@@ -94,6 +116,9 @@ def studentloan_interest(balance, date, interest_rate):
   monthly_interest = daily_interest * get_days_in_month(date)
   monthly_interest = truncate_digits(monthly_interest, 2)
   return monthly_interest
+
+def carloan_interest(balance, date, interest_rate):
+  return studentloan_interest(balance, date, interest_rate)
 
 def add_single_loan_transaction(sent_payment, loan_account_id, interest_rate,
     interest_category_id, interest_payee, interest_type=mortgage_interest,
