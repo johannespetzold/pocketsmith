@@ -45,7 +45,7 @@ def add_mortgage_loan_transactions():
   sent_payments = find_transactions(search_term, checking_account_id, num_days=90)
   for txn in sent_payments:
     logging.info('  %s\t%s\t%s', txn['date'], txn['amount'], txn['payee'])
-  assert 1 <= len(sent_payments) and len(sent_payments) <= 3
+  assert 1 <= len(sent_payments) and len(sent_payments) <= 4
   for txn in reversed(sent_payments):
     add_single_loan_transaction(
         txn,
@@ -213,6 +213,9 @@ def find_transactions(search_term, account_id, num_days, end_date=datetime.datet
     })
 
 def add_transfer(from_account_id, from_account_name, to_account_id, to_account_name, date, amount):
+  if amount == 0:
+    logging.info('Skipping transfer (amount is zero).')
+    return
   add_transaction(from_account_id, date, -amount, to_account_name, transfer_category_id, True)
   add_transaction(to_account_id, date, amount, from_account_name, transfer_category_id, True)
 
