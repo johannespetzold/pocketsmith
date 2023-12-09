@@ -36,7 +36,7 @@ base_url = "https://api.pocketsmith.com/v2/"
 def main():
   add_mortgage_loan_transactions()
   add_studentloan_loan_transactions()
-  add_carloan_loan_transactions()
+  #add_carloan_loan_transactions()
 
 
 def add_mortgage_loan_transactions():
